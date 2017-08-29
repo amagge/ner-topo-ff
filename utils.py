@@ -1,11 +1,12 @@
 """Utility functions for loading datasets and computing performance"""
 from __future__ import print_function
 
+from os.path import join
 from random import random
 
 import numpy as np
 from gensim.models.keyedvectors import KeyedVectors
-from os.path import join
+
 
 class WordEmb(object):
     """Loads the word2vec model"""
@@ -50,95 +51,49 @@ def get_namedentities(args, tokens, prediction):
     assert len(tokens) == len(prediction)
     entities = []
     indices = []
-    incon = 0
-    if args.n_classes == 2:
-        found = False
-        entity = ''
-        indstr = ''
-        for i, label in enumerate(prediction):
-            if label == 0:
-                if found:
-                    if entity != '':
-                        entity += "_{}".format(i)
-                        indstr += "_{}".format(tokens[i])
-                else:
-                    if entity == '':
-                        entity = "{}".format(i)
-                        indstr = "{}".format(tokens[i])
-                        found = True
-            else:
-                found = False
-                if entity != '':
-                    entities.append(entity)
-                    indices.append(indstr)
-                    entity = ''
-                    indstr = ''
-    elif args.n_classes == 3:
-        entity = ''
-        indstr = ''
-        for i, label in enumerate(prediction):
-            if label == 0:
-                if entity != '':
-                    entities.append(entity)
-                    indices.append(indstr)
-                entity = "{}".format(i)
-                indstr = "{}".format(tokens[i])
-            elif label == 1:
+    found = False
+    entity = ''
+    indstr = ''
+    for i, label in enumerate(prediction):
+        if label == 0:
+            if found:
                 if entity != '':
                     entity += "_{}".format(i)
                     indstr += "_{}".format(tokens[i])
-                else:
-                    # print("shouldn't be {} {}".format(i, tokens[i]))
-                    incon += 1
+            else:
+                if entity == '':
                     entity = "{}".format(i)
                     indstr = "{}".format(tokens[i])
-            else:
-                if entity != '':
-                    entities.append(entity)
-                    indices.append(indstr)
-                    entity = ''
-                    indstr = ''
-    print("Inconsistenceis\t{}".format(incon))
+                    found = True
+        else:
+            found = False
+            if entity != '':
+                entities.append(entity)
+                indices.append(indstr)
+                entity = ''
+                indstr = ''
     assert len(indices) == len(entities)
     return indices, entities
 
 def get_ne_indexes(args, tags):
     '''Get named entities by indices'''
     entities = []
-    if args.n_classes == 2:
-        found = False
-        entity = ''
-        for i, label in enumerate(tags):
-            if label == 0:
-                if found:
-                    if entity != '':
-                        entity += "_{}".format(i)
-                else:
-                    if entity == '':
-                        entity = "{}".format(i)
-                        found = True
-            else:
-                found = False
-                if entity != '':
-                    entities.append(entity)
-                    entity = ''
-    elif args.n_classes == 3:
-        entity = ''
-        for i, label in enumerate(tags):
-            if label == 0:
-                if entity != '':
-                    entities.append(entity)
-                entity = "{}".format(i)
-            elif label == 1:
+    found = False
+    entity = ''
+    for i, label in enumerate(tags):
+        if label == 0:
+            if found:
                 if entity != '':
                     entity += "_{}".format(i)
-                else:
-                    # print("shouldn't be {}".format(i))
-                    entity = "{}".format(i)
             else:
-                if entity != '':
-                    entities.append(entity)
-                    entity = ''
+                if entity == '':
+                    entity = "{}".format(i)
+                    found = True
+        else:
+            found = False
+            if entity != '':
+                entities.append(entity)
+                entity = ''
     return entities
 
 def write_errors(tokens, true_pos, false_pos, false_neg, fname='results.txt'):
@@ -190,15 +145,7 @@ def write_pred_and_entities(args, tokens, prediction, pmid):
     fname = join(args.outdir, pmid + '_pred.txt')
     rfile = open(fname, 'w')
     for i, label in enumerate(prediction):
-        if args.n_classes == 2:
-            label = 'I' if label == 0 else 'O'
-        elif args.n_classes == 3:
-            if label == 0:
-                label = 'B'
-            elif label == 1:
-                label = 'I'
-            else:
-                label = 'O'
+        label = 'I' if label == 0 else 'O'
         print("{}\t{}".format(tokens[i], label), file=rfile)
     rfile.close()
     fname = join(args.outdir, pmid + '_nes.txt')
@@ -272,24 +219,12 @@ def get_input(args, word_emb_model, input_file):
         word = line.split()[0]
         label = line.split()[1]
         words.append(word)
-        if args.n_classes == 3:
-            if label == 'B':
-                labels.append(np.array([1, 0, 0]))
-            elif label == 'I':
-                labels.append(np.array([0, 1, 0]))
-            elif label == 'O':
-                labels.append(np.array([0, 0, 1]))
-            else:
-                print("Invalid tag {} found for word {}".format(label, word))
-        elif args.n_classes == 2:
-            if label == 'I':
-                labels.append(np.array([1, 0]))
-            elif label == 'O':
-                labels.append(np.array([0, 1]))
-            else:
-                print("Invalid tag {} found for word {}".format(label, word))
+        if label == 'I':
+            labels.append(np.array([1, 0]))
+        elif label == 'O':
+            labels.append(np.array([0, 1]))
         else:
-            print("Invalid number of classes {}. Only 2,3 allowed.".format(args.n_classes))
+            print("Invalid tag {} found for word {}".format(label, word))
     for _ in range(n_neighbors):
         words.append(padding)
     instances = []

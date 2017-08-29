@@ -29,10 +29,8 @@ class FFModel(object):
         biases_b2 = tf.Variable(tf.random_normal([hid_dim])),
         biases_b3 = tf.Variable(tf.random_normal([n_classes]))
         # operations for predictions
-        # self.input_x = tf.nn.dropout(self.input_x, self.dropout)
         layer_1 = tf.add(tf.matmul(self.input_x, weights_w1), biases_b1)
         layer_1 = tf.nn.relu(layer_1)
-        # layer_1 = tf.nn.dropout(layer_1, self.dropout)
         layer_2 = tf.add(tf.matmul(layer_1, weights_w2), biases_b2)
         layer_2 = tf.nn.relu(layer_2)
         layer_2 = tf.nn.dropout(layer_2, self.dropout)
@@ -64,11 +62,10 @@ def train(args):
                                           feed_dict={model.input_x: np.asarray(instances),
                                                      model.output_y: np.asarray(labels),
                                                      model.dropout: 1.0})
-            # prec, recall, f1sc = f1score(args.n_classes, prediction, target)
-            prec, recall, f1sc = phrasalf1score(args, tokens, prediction, target)
+            prec, recall, f1sc = f1score(2, prediction, target)
             if write_result:
-                prec, recall, f1sc = f1score(args.n_classes, prediction, target)
-                print("Found MAX\n--Tokenwise P:{:.5f}".format(prec), "R:{:.5f}".format(recall),
+                print("Found MAX")
+                print("--Tokenwise P:{:.5f}".format(prec), "R:{:.5f}".format(recall),
                       "F1:{:.5f}".format(f1sc))
                 prec, recall, f1sc = phrasalf1score(args, tokens, prediction, target)
                 print("--Phrasal P:{:.5f}".format(prec), "R:{:.5f}".format(recall),
@@ -120,7 +117,6 @@ def train(args):
                         evaluate(test_t, test_v, test_l, True)
                         if args.save is not None:
                             # Write model checkpoint to disk
-                            # saver.restore(sess, args.save)
                             print("Saving model to {}".format(args.save))
                             saver.save(sess, args.save)
             print("Optimization Finished!")
@@ -143,22 +139,16 @@ def main():
     '''Main method : parse input arguments and train'''
     parser = argparse.ArgumentParser()
     # Input files
-    # parser.add_argument('--train', type=str, default='data/io/train-io.txt',
-    #                     help='train file location')
-    # parser.add_argument('--test', type=str, default='data/io/test-io.txt',
-    #                     help='test file location')
-    # parser.add_argument('--val', type=str, default='data/io/val-io.txt',
-    #                     help='val file location')
-    parser.add_argument('--train', type=str, default='data/bio/train-bio.txt',
+    parser.add_argument('--train', type=str, default='data/io/train-io.txt',
                         help='train file location')
-    parser.add_argument('--test', type=str, default='data/bio/test-bio.txt',
+    parser.add_argument('--test', type=str, default='data/io/test-io.txt',
                         help='test file location')
-    parser.add_argument('--val', type=str, default='data/bio/val-bio.txt',
+    parser.add_argument('--val', type=str, default='data/io/val-io.txt',
                         help='val file location')
     parser.add_argument('--dist', type=str, default='data/dist/',
                         help='distance supervision files dir.')
     parser.add_argument('--pubdir', type=str, default='data/pubmed/',
-                        help='pubmed files dir. To be production set. ')
+                        help='pubmed files dir containing production set. ')
     parser.add_argument('--outdir', type=str, default='out/pubmed/',
                         help='Output dir for ffmodel annotated pubmed files.')
     # Word Embeddings
@@ -166,7 +156,7 @@ def main():
                         help='word2vec embedding location')
     parser.add_argument('--embvocab', type=int, default=-1, help='load top n words in word emb')
     # Hyperparameters
-    parser.add_argument('--hid_dim', type=int, default=200, help='dimension of hidden layers')
+    parser.add_argument('--hid_dim', type=int, default=100, help='dimension of hidden layers')
     parser.add_argument('--lrn_rate', type=float, default=0.001, help='learning rate')
     parser.add_argument('--feat_cap', type=str, default=None, help='Capitalization feature')
     parser.add_argument('--feat_dict', type=str, default=None, help='Dictionary feature')
@@ -176,9 +166,9 @@ def main():
     parser.add_argument('--dist_epochs', type=int, default=2, help='number of distsup epochs')
     parser.add_argument('--train_epochs', type=int, default=50, help='number of train epochs')
     parser.add_argument('--eval_interval', type=int, default=1, help='evaluate once in _ epochs')
+    parser.add_argument('--batch_size', type=int, default=200, help='batch size of training')
     parser.add_argument('--n_classes', type=int, default=2, choices=range(2, 4),
                         help='number of classes')
-    parser.add_argument('--batch_size', type=int, default=128, help='batch size of training')
     # Model save and restore paths
     parser.add_argument('--restore', type=str, default="model/ffm", help="path of saved model")
     parser.add_argument('--save', type=str, default="model/ffm", help="path to save model")
