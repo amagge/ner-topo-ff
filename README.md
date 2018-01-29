@@ -49,3 +49,27 @@ optional arguments:
 Input files:
 
 Annotated input expected as a file containing tokens on each line along with their respective annotations B/I/O or I/O separated by tab-spaces.
+
+```
+Overall O  
+, O  
+these O  
+results O  
+indicate O  
+widespread O  
+human-to-animal O  
+transmission O  
+of O  
+pandemic O  
+( O  
+H1N1 O  
+) O  
+2009 O  
+influenza O  
+viruses O  
+in O  
+South B  
+Korea I  
+. O  
+```
+
