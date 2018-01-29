@@ -1,15 +1,17 @@
-# ner-topo-ff
-NER for toponym extraction using a feedforward deep neural network and distance supervision
-
-Requirements:
-tensorflow
-numpy
-
-To run :
-python ff_model.py
-
-Argparse prompt
-
+# ner-topo-ff  
+Named Entity Recognizer (NER) for entity extraction using a feedforward deep neural network and distance supervision  
+  
+Requirements:  
+tensorflow  
+numpy  
+arparse 
+gensim  
+  
+To run :  
+python ff_model.py  
+  
+Argparse prompt  
+  
 usage: ff_model.py [-h] [--train TRAIN] [--test TEST] [--val VAL]
                    [--dist DIST] [--pubdir PUBDIR] [--outdir OUTDIR]
                    [--emb_loc EMB_LOC] [--embvocab EMBVOCAB]
@@ -19,33 +21,31 @@ usage: ff_model.py [-h] [--train TRAIN] [--test TEST] [--val VAL]
                    [--dist_epochs DIST_EPOCHS] [--train_epochs TRAIN_EPOCHS]
                    [--eval_interval EVAL_INTERVAL] [--n_classes {2,3}]
                    [--batch_size BATCH_SIZE] [--restore RESTORE] [--save SAVE]
+  
+optional arguments:  
+  -h, --help            show this help message and exit  
+  --train _TRAIN_         train file location  
+  --test _TEST_           test file location  
+  --val _VAL_             val file location  
+  --dist _DIST_           distance supervision files dir.  
+  --pubdir _PUBDIR_       pubmed files dir. To be production set.  
+  --outdir _OUTDIR_       Output dir for ffmodel annotated pubmed files.  
+  --emb_loc _EMB_LOC_     word2vec embedding location  
+  --embvocab _EMBVOCAB_   load top n words in word emb  
+  --hid_dim _HID_DIM_     dimension of hidden layers  
+  --lrn_rate _LRN_RATE_   learning rate  
+  --feat_cap _FEAT_CAP_   Capitalization feature  
+  --feat_dict _FEAT_DICT_ Dictionary feature  
+  --dropout _DROPOUT_     dropout probability  
+  --window_size _WINDOW_SIZE_ context window size - 3/5/7  
+  --dist_epochs _DIST_EPOCHS_ number of distsup epochs  
+  --train_epochs _TRAIN_EPOCHS_ number of train epochs  
+  --eval_interval _EVAL_INTERVAL_ evaluate once in _ epochs  
+  --n_classes _{2,3}_     number of classes  
+  --batch_size _BATCH_SIZE_ batch size of training  
+  --restore _RESTORE_     path of saved model  
+  --save _SAVE_           path to save model  
 
-optional arguments:
-  -h, --help            show this help message and exit
-  --train TRAIN         train file location
-  --test TEST           test file location
-  --val VAL             val file location
-  --dist DIST           distance supervision files dir.
-  --pubdir PUBDIR       pubmed files dir. To be production set.
-  --outdir OUTDIR       Output dir for ffmodel annotated pubmed files.
-  --emb_loc EMB_LOC     word2vec embedding location
-  --embvocab EMBVOCAB   load top n words in word emb
-  --hid_dim HID_DIM     dimension of hidden layers
-  --lrn_rate LRN_RATE   learning rate
-  --feat_cap FEAT_CAP   Capitalization feature
-  --feat_dict FEAT_DICT
-                        Dictionary feature
-  --dropout DROPOUT     dropout probability
-  --window_size WINDOW_SIZE
-                        context window size - 3/5/7
-  --dist_epochs DIST_EPOCHS
-                        number of distsup epochs
-  --train_epochs TRAIN_EPOCHS
-                        number of train epochs
-  --eval_interval EVAL_INTERVAL
-                        evaluate once in _ epochs
-  --n_classes {2,3}     number of classes
-  --batch_size BATCH_SIZE
-                        batch size of training
-  --restore RESTORE     path of saved model
-  --save SAVE           path to save model
+Input files:
+
+Annotated input expected as a file containing tokens on each line along with their respective annotations B/I/O or I/O separated by tab-spaces.
